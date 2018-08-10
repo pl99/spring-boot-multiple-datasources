@@ -1,10 +1,11 @@
-package com.foobar;
+package com.foobar.config;
 
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceBuilder;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
+import org.springframework.boot./*autoconfigure.*/jdbc.DataSourceBuilder;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder;
 import org.springframework.context.annotation.Bean;
@@ -18,8 +19,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @Configuration
 @EnableTransactionManagement
-@EnableJpaRepositories(entityManagerFactoryRef = "entityManagerFactory",
-    basePackages = {"com.foobar.foo.repo"})
+@EnableJpaRepositories(entityManagerFactoryRef = "entityManagerFactory", basePackages = {"com.foobar.foo.repo"})
 public class FooDbConfig {
 
   @Primary
@@ -43,4 +43,20 @@ public class FooDbConfig {
       @Qualifier("entityManagerFactory") EntityManagerFactory entityManagerFactory) {
     return new JpaTransactionManager(entityManagerFactory);
   }
+
+
+  @Primary
+  @Bean(name = "DataSourceProperties")
+  @ConfigurationProperties("bar.datasource")
+  public DataSourceProperties dataSourceProperties() {
+    return new DataSourceProperties();
+  }
+
+  @Primary
+  @Bean
+  //@ConfigurationProperties("bar.datasource")
+  public DataSource dataSource(@Qualifier("DataSourceProperties") DataSourceProperties properties) {
+    return properties.initializeDataSourceBuilder().build();
+  }
+
 }
